@@ -5,216 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto Video Creator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center mb-8 text-blue-600">
-            <i class="fas fa-video mr-2"></i>Auto Video Creator
-        </h1>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-3xl font-bold text-center mb-8">Auto Video Creator</h1>
+        
+        <!-- Text Generation -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">1. Generate Text Content</h2>
+            <textarea id="prompt" class="w-full p-2 border rounded" rows="4" placeholder="Enter your prompt for text generation..."></textarea>
+            <button onclick="generateText()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Generate Text</button>
+            <div id="generatedText" class="mt-4 p-4 bg-gray-50 rounded hidden"></div>
+        </div>
 
-        <!-- Main Form -->
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-            <!-- Step 1: Generate Text -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">1</span>
-                    Generate Text Content
-                </h2>
-                <div class="space-y-4">
-                    <textarea id="textPrompt" class="w-full p-3 border rounded-lg" rows="3" 
-                        placeholder="Enter prompt for text generation (e.g., 'Create an inspiring 30-second message about nature')"></textarea>
-                    <button onclick="generateText()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-magic mr-2"></i>Generate Text
-                    </button>
-                    <div id="generatedText" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+        <!-- Video Search -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">2. Search Stock Footage</h2>
+            <input type="text" id="videoQuery" class="w-full p-2 border rounded" placeholder="Enter keywords for video search...">
+            <button onclick="searchVideo()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search Video</button>
+            <div id="videoPreview" class="mt-4 hidden">
+                <video id="previewPlayer" class="w-full rounded" controls></video>
+            </div>
+        </div>
+
+        <!-- Speech Generation -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">3. Generate Speech</h2>
+            <button onclick="generateSpeech()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Generate Speech</button>
+            <div id="audioPreview" class="mt-4 hidden">
+                <audio id="previewAudio" class="w-full" controls></audio>
+            </div>
+        </div>
+
+        <!-- Background Music -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">4. Background Music Options</h2>
+            <div class="flex items-center space-x-4">
+                <label class="inline-flex items-center">
+                    <input type="checkbox" id="useBackgroundMusic" class="form-checkbox h-5 w-5 text-blue-600">
+                    <span class="ml-2">Add background music</span>
+                </label>
+                <div class="flex items-center">
+                    <label class="mr-2">Volume:</label>
+                    <input type="range" id="bgMusicVolume" min="0" max="100" value="30" class="w-32">
+                    <span id="volumeValue" class="ml-2">30%</span>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 2: Download Video -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">2</span>
-                    Get Stock Footage
-                </h2>
-                <div class="space-y-4">
-                    <input type="text" id="videoQuery" class="w-full p-3 border rounded-lg" 
-                        placeholder="Enter search query for video (e.g., 'beautiful nature landscape')">
-                    <button onclick="downloadVideo()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-download mr-2"></i>Download Video
-                    </button>
-                    <div id="videoStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
-                </div>
-            </div>
-
-            <!-- Step 3: Generate Speech -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">3</span>
-                    Generate Speech
-                </h2>
-                <button onclick="generateSpeech()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                    <i class="fas fa-microphone mr-2"></i>Generate Speech
-                </button>
-                <div id="speechStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
-            </div>
-
-            <!-- Step 4: Create Final Video -->
-            <div class="mb-8">
-                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">4</span>
-                    Create Final Video
-                </h2>
-                <button onclick="createVideo()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                    <i class="fas fa-film mr-2"></i>Create Video
-                </button>
-                <div id="videoCreationStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+        <!-- Video Creation -->
+        <div class="mb-8">
+            <h2 class="text-xl font-semibold mb-4">5. Create Final Video</h2>
+            <button onclick="createVideo()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create Video</button>
+            <div id="finalVideo" class="mt-4 hidden">
+                <video id="finalPlayer" class="w-full rounded" controls></video>
+                <a id="downloadLink" class="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" download>Download Video</a>
             </div>
         </div>
     </div>
 
     <script>
-        let state = {
-            generatedText: '',
-            videoPath: '',
-            audioPath: '',
-            finalVideoPath: ''
-        };
+        let generatedText = '';
+        let videoPath = '';
+        let audioPath = '';
+        
+        // Update volume display
+        document.getElementById('bgMusicVolume').addEventListener('input', function(e) {
+            document.getElementById('volumeValue').textContent = e.target.value + '%';
+        });
 
         async function generateText() {
-            const prompt = document.getElementById('textPrompt').value;
-            if (!prompt) {
-                alert('Please enter a prompt');
-                return;
-            }
-
-            const statusDiv = document.getElementById('generatedText');
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating text...';
-            statusDiv.classList.remove('hidden');
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) return;
 
             try {
                 const response = await fetch('/generate-text', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ prompt }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                state.generatedText = data.text;
-                statusDiv.innerHTML = `<div class="font-semibold mb-2">Generated Text:</div>${data.text}`;
-                statusDiv.classList.add('bg-green-50');
+                if (data.text) {
+                    generatedText = data.text;
+                    const textDiv = document.getElementById('generatedText');
+                    textDiv.textContent = data.text;
+                    textDiv.classList.remove('hidden');
+                }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
-                statusDiv.classList.add('bg-red-50');
+                console.error('Error:', error);
+                alert('Failed to generate text');
             }
         }
 
-        async function downloadVideo() {
+        async function searchVideo() {
             const query = document.getElementById('videoQuery').value;
-            if (!query) {
-                alert('Please enter a search query');
-                return;
-            }
-
-            const statusDiv = document.getElementById('videoStatus');
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Downloading video...';
-            statusDiv.classList.remove('hidden');
+            if (!query) return;
 
             try {
                 const response = await fetch('/download-video', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ query }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                state.videoPath = data.path;
-                statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2 text-green-500"></i>Video downloaded successfully!';
-                statusDiv.classList.add('bg-green-50');
+                if (data.path) {
+                    videoPath = data.path;
+                    const preview = document.getElementById('videoPreview');
+                    const player = document.getElementById('previewPlayer');
+                    player.src = `/download/${data.path.split('/').pop()}`;
+                    preview.classList.remove('hidden');
+                }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
-                statusDiv.classList.add('bg-red-50');
+                console.error('Error:', error);
+                alert('Failed to download video');
             }
         }
 
         async function generateSpeech() {
-            if (!state.generatedText) {
+            if (!generatedText) {
                 alert('Please generate text first');
                 return;
             }
 
-            const statusDiv = document.getElementById('speechStatus');
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating speech...';
-            statusDiv.classList.remove('hidden');
-
             try {
                 const response = await fetch('/generate-speech', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text: state.generatedText }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: generatedText })
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                state.audioPath = data.path;
-                statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2 text-green-500"></i>Speech generated successfully!';
-                statusDiv.classList.add('bg-green-50');
+                if (data.path) {
+                    audioPath = data.path;
+                    const preview = document.getElementById('audioPreview');
+                    const audio = document.getElementById('previewAudio');
+                    audio.src = `/download/${data.path.split('/').pop()}`;
+                    preview.classList.remove('hidden');
+                }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
-                statusDiv.classList.add('bg-red-50');
+                console.error('Error:', error);
+                alert('Failed to generate speech');
             }
         }
 
         async function createVideo() {
-            if (!state.videoPath || !state.audioPath) {
-                alert('Please complete all previous steps first');
+            if (!videoPath || !audioPath) {
+                alert('Please ensure you have both video and audio ready');
                 return;
             }
 
-            const statusDiv = document.getElementById('videoCreationStatus');
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating final video...';
-            statusDiv.classList.remove('hidden');
+            const useBackgroundMusic = document.getElementById('useBackgroundMusic').checked;
+            const bgVolume = document.getElementById('bgMusicVolume').value / 100;
 
             try {
                 const response = await fetch('/create-video', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        video_path: state.videoPath,
-                        audio_path: state.audioPath,
-                        text_content: state.generatedText
-                    }),
+                        video_path: videoPath,
+                        audio_path: audioPath,
+                        text_content: generatedText,
+                        background_music: useBackgroundMusic ? 'yes' : 'no',
+                        background_volume: bgVolume
+                    })
                 });
 
                 const data = await response.json();
-                if (data.error) throw new Error(data.error);
-
-                state.finalVideoPath = data.path;
-                statusDiv.innerHTML = `
-                    <div class="text-green-500 mb-4">
-                        <i class="fas fa-check-circle mr-2"></i>Video created successfully!
-                    </div>
-                    <a href="/download/final_video.mp4" 
-                       class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors inline-block">
-                        <i class="fas fa-download mr-2"></i>Download Video
-                    </a>`;
-                statusDiv.classList.add('bg-green-50');
+                if (data.path) {
+                    const finalDiv = document.getElementById('finalVideo');
+                    const player = document.getElementById('finalPlayer');
+                    const downloadLink = document.getElementById('downloadLink');
+                    const filename = data.path.split('/').pop();
+                    
+                    player.src = `/download/${filename}`;
+                    downloadLink.href = `/download/${filename}`;
+                    finalDiv.classList.remove('hidden');
+                }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
-                statusDiv.classList.add('bg-red-50');
+                console.error('Error:', error);
+                alert('Failed to create video');
             }
         }
     </script>
