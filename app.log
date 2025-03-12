@@ -1,0 +1,103 @@
+2025-03-12 18:05:55,074 - INFO - Gemini API initialized successfully
+2025-03-12 18:05:55,075 - INFO - ElevenLabs API initialized successfully
+2025-03-12 18:05:55,076 - INFO - Starting Flask application
+2025-03-12 18:05:55,111 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.17.0.2:8080
+2025-03-12 18:05:55,111 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-12 18:05:55,112 - INFO -  * Restarting with stat
+2025-03-12 18:05:55,698 - INFO - Gemini API initialized successfully
+2025-03-12 18:05:55,698 - INFO - ElevenLabs API initialized successfully
+2025-03-12 18:05:55,699 - INFO - Starting Flask application
+2025-03-12 18:05:55,705 - WARNING -  * Debugger is active!
+2025-03-12 18:05:55,705 - INFO -  * Debugger PIN: 724-864-215
+2025-03-12 18:06:00,480 - INFO - Homepage accessed
+2025-03-12 18:06:00,486 - INFO - 127.0.0.1 - - [12/Mar/2025 18:06:00] "GET / HTTP/1.1" 200 -
+2025-03-12 18:06:07,927 - INFO - Generating text for prompt: bahasa sasak...
+2025-03-12 18:06:07,996 - ERROR - Error in text generation: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-03-12 18:06:07,997 - INFO - 127.0.0.1 - - [12/Mar/2025 18:06:07] "[35m[1mPOST /generate-text HTTP/1.1[0m" 500 -
+2025-03-12 18:06:17,016 - INFO - Generating text for prompt: bahasa Sasak...
+2025-03-12 18:06:17,055 - ERROR - Error in text generation: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-03-12 18:06:17,056 - INFO - 127.0.0.1 - - [12/Mar/2025 18:06:17] "[35m[1mPOST /generate-text HTTP/1.1[0m" 500 -
+2025-03-12 18:24:02,937 - INFO - Gemini API initialized successfully
+2025-03-12 18:24:02,937 - INFO - ElevenLabs API initialized successfully
+2025-03-12 18:24:02,941 - INFO - Starting Flask application
+2025-03-12 18:24:03,015 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.17.0.2:8080
+2025-03-12 18:24:03,016 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-12 18:24:03,018 - INFO -  * Restarting with stat
+2025-03-12 18:24:03,840 - INFO - Gemini API initialized successfully
+2025-03-12 18:24:03,841 - INFO - ElevenLabs API initialized successfully
+2025-03-12 18:24:03,842 - INFO - Starting Flask application
+2025-03-12 18:24:03,848 - WARNING -  * Debugger is active!
+2025-03-12 18:24:03,849 - INFO -  * Debugger PIN: 724-864-215
+2025-03-12 18:24:08,566 - INFO - Homepage accessed
+2025-03-12 18:24:08,573 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:08] "GET / HTTP/1.1" 200 -
+2025-03-12 18:24:23,542 - INFO - Generating text for prompt: indonesia dimana...
+2025-03-12 18:24:24,567 - INFO - Text generated successfully
+2025-03-12 18:24:24,568 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:24] "POST /generate-text HTTP/1.1" 200 -
+2025-03-12 18:24:34,497 - INFO - Searching video for query: indonesia
+2025-03-12 18:24:34,666 - INFO - Downloading video from: https://videos.pexels.com/video-files/2084684/2084684-uhd_2560_1440_30fps.mp4
+2025-03-12 18:24:35,316 - INFO - Video downloaded successfully
+2025-03-12 18:24:35,325 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:35] "POST /download-video HTTP/1.1" 200 -
+2025-03-12 18:24:35,585 - INFO - Downloading file: temp_video.mp4
+2025-03-12 18:24:35,679 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:35] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:36,970 - INFO - Downloading file: temp_video.mp4
+2025-03-12 18:24:36,971 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:36] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:37,667 - INFO - Downloading file: temp_video.mp4
+2025-03-12 18:24:37,668 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:37] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:40,905 - INFO - Generating speech from text
+2025-03-12 18:24:48,546 - INFO - Speech generated successfully
+2025-03-12 18:24:48,546 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:48] "POST /generate-speech HTTP/1.1" 200 -
+2025-03-12 18:24:48,796 - INFO - Downloading file: temp_audio.mp3
+2025-03-12 18:24:48,797 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:48] "[35m[1mGET /download/temp_audio.mp3 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:50,839 - INFO - Downloading file: temp_audio.mp3
+2025-03-12 18:24:50,840 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:50] "[35m[1mGET /download/temp_audio.mp3 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:51,089 - INFO - Downloading file: temp_audio.mp3
+2025-03-12 18:24:51,090 - INFO - 127.0.0.1 - - [12/Mar/2025 18:24:51] "[35m[1mGET /download/temp_audio.mp3 HTTP/1.1[0m" 206 -
+2025-03-12 18:24:57,558 - INFO - Starting video creation process
+2025-03-12 18:24:57,558 - INFO - Loading video and audio files
+2025-03-12 18:24:58,442 - INFO - Resizing video to 720p
+2025-03-12 18:24:58,570 - INFO - Creating text overlays
+2025-03-12 18:24:58,599 - ERROR - Error creating text clip: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmpjr9n_icl.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmpki7i1lkq.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-12 18:24:58,613 - ERROR - Error creating text clip: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmpq0cfc7xi.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmpx7js22i2.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-12 18:24:58,626 - ERROR - Error creating text clip: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmplznnprpf.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmpnlflenh_.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-12 18:24:58,640 - ERROR - Error creating text clip: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmpvijbz2c1.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmpema4cp7_.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-12 18:24:58,649 - ERROR - Error creating text clip: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmptirkltsc.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmplayxydjx.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-12 18:24:58,649 - INFO - Combining video clips
+2025-03-12 18:24:58,664 - INFO - Adding audio to video
+2025-03-12 18:24:58,664 - INFO - Final video duration: 27.67 seconds
+2025-03-12 18:24:58,664 - INFO - Exporting final video
