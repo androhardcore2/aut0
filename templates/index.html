@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Video Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center mb-8 text-blue-600">
+            <i class="fas fa-video mr-2"></i>Auto Video Creator
+        </h1>
+
+        <!-- Main Form -->
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+            <!-- Step 1: Generate Text -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">1</span>
+                    Generate Text Content
+                </h2>
+                <div class="space-y-4">
+                    <textarea id="textPrompt" class="w-full p-3 border rounded-lg" rows="3" 
+                        placeholder="Enter prompt for text generation (e.g., 'Create an inspiring 30-second message about nature')"></textarea>
+                    <button onclick="generateText()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-magic mr-2"></i>Generate Text
+                    </button>
+                    <div id="generatedText" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- Step 2: Download Video -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">2</span>
+                    Get Stock Footage
+                </h2>
+                <div class="space-y-4">
+                    <input type="text" id="videoQuery" class="w-full p-3 border rounded-lg" 
+                        placeholder="Enter search query for video (e.g., 'beautiful nature landscape')">
+                    <button onclick="downloadVideo()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-download mr-2"></i>Download Video
+                    </button>
+                    <div id="videoStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+                </div>
+            </div>
+
+            <!-- Step 3: Generate Speech -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">3</span>
+                    Generate Speech
+                </h2>
+                <button onclick="generateSpeech()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-microphone mr-2"></i>Generate Speech
+                </button>
+                <div id="speechStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+            </div>
+
+            <!-- Step 4: Create Final Video -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 inline-flex items-center justify-center mr-2">4</span>
+                    Create Final Video
+                </h2>
+                <button onclick="createVideo()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-film mr-2"></i>Create Video
+                </button>
+                <div id="videoCreationStatus" class="hidden p-4 bg-gray-50 rounded-lg"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            generatedText: '',
+            videoPath: '',
+            audioPath: '',
+            finalVideoPath: ''
+        };
+
+        async function generateText() {
+            const prompt = document.getElementById('textPrompt').value;
+            if (!prompt) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            const statusDiv = document.getElementById('generatedText');
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating text...';
+            statusDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/generate-text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt }),
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                state.generatedText = data.text;
+                statusDiv.innerHTML = `<div class="font-semibold mb-2">Generated Text:</div>${data.text}`;
+                statusDiv.classList.add('bg-green-50');
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
+                statusDiv.classList.add('bg-red-50');
+            }
+        }
+
+        async function downloadVideo() {
+            const query = document.getElementById('videoQuery').value;
+            if (!query) {
+                alert('Please enter a search query');
+                return;
+            }
+
+            const statusDiv = document.getElementById('videoStatus');
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Downloading video...';
+            statusDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/download-video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                state.videoPath = data.path;
+                statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2 text-green-500"></i>Video downloaded successfully!';
+                statusDiv.classList.add('bg-green-50');
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
+                statusDiv.classList.add('bg-red-50');
+            }
+        }
+
+        async function generateSpeech() {
+            if (!state.generatedText) {
+                alert('Please generate text first');
+                return;
+            }
+
+            const statusDiv = document.getElementById('speechStatus');
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating speech...';
+            statusDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/generate-speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: state.generatedText }),
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                state.audioPath = data.path;
+                statusDiv.innerHTML = '<i class="fas fa-check-circle mr-2 text-green-500"></i>Speech generated successfully!';
+                statusDiv.classList.add('bg-green-50');
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
+                statusDiv.classList.add('bg-red-50');
+            }
+        }
+
+        async function createVideo() {
+            if (!state.videoPath || !state.audioPath) {
+                alert('Please complete all previous steps first');
+                return;
+            }
+
+            const statusDiv = document.getElementById('videoCreationStatus');
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating final video...';
+            statusDiv.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/create-video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        video_path: state.videoPath,
+                        audio_path: state.audioPath,
+                        text_content: state.generatedText
+                    }),
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                state.finalVideoPath = data.path;
+                statusDiv.innerHTML = `
+                    <div class="text-green-500 mb-4">
+                        <i class="fas fa-check-circle mr-2"></i>Video created successfully!
+                    </div>
+                    <a href="/download/final_video.mp4" 
+                       class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors inline-block">
+                        <i class="fas fa-download mr-2"></i>Download Video
+                    </a>`;
+                statusDiv.classList.add('bg-green-50');
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>${error.message}</div>`;
+                statusDiv.classList.add('bg-red-50');
+            }
+        }
+    </script>
+</body>
+</html>
