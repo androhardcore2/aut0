@@ -6,61 +6,287 @@
     <title>Auto Video Creator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Previous styles remain the same */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .edit-mode {
+            border: 2px solid #6366f1;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .step-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .step-enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .prompt-suggestion {
+            transition: all 0.3s ease;
+        }
+        .prompt-suggestion:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+        .generated-text-container {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #6366f1 rgba(255, 255, 255, 0.1);
+        }
+        .generated-text-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .generated-text-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        .generated-text-container::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 4px;
+        }
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .success-message {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h1 class="text-3xl font-bold text-center mb-8">Auto Video Creator</h1>
-        
-        <!-- Text Generation -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">1. Generate Text Content</h2>
-            <textarea id="prompt" class="w-full p-2 border rounded" rows="4" placeholder="Enter your prompt for text generation..."></textarea>
-            <button onclick="generateText()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Generate Text</button>
-            <div id="generatedText" class="mt-4 p-4 bg-gray-50 rounded hidden"></div>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <div class="container mx-auto px-4 py-8">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">
+                Auto Video Creator
+            </h1>
+            <p class="text-gray-400">Create professional videos with AI-powered content</p>
         </div>
 
-        <!-- Video Search -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">2. Search Stock Footage</h2>
-            <input type="text" id="videoQuery" class="w-full p-2 border rounded" placeholder="Enter keywords for video search...">
-            <button onclick="searchVideo()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Search Video</button>
-            <div id="videoPreview" class="mt-4 hidden">
-                <video id="previewPlayer" class="w-full rounded" controls></video>
-            </div>
-        </div>
+        <div class="max-w-4xl mx-auto space-y-8">
+            <!-- Step 1: Text Generation -->
+            <div id="step1" class="glass-effect rounded-xl p-6 shadow-xl step-enabled">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-4">
+                        <span class="text-xl">1</span>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-semibold">Generate Text Content</h2>
+                        <p class="text-gray-400 mt-1">Create engaging content with Gemini AI</p>
+                    </div>
+                </div>
 
-        <!-- Speech Generation -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">3. Generate Speech</h2>
-            <button onclick="generateSpeech()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Generate Speech</button>
-            <div id="audioPreview" class="mt-4 hidden">
-                <audio id="previewAudio" class="w-full" controls></audio>
-            </div>
-        </div>
+                <!-- Prompt Suggestions -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Quick Prompts</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="prompt-suggestion p-3 rounded-lg border border-gray-700 cursor-pointer"
+                             onclick="usePrompt('Create a 30-second inspirational message about pursuing your dreams')">
+                            <i class="fas fa-star text-yellow-500 mr-2"></i>
+                            Inspirational Message
+                        </div>
+                        <div class="prompt-suggestion p-3 rounded-lg border border-gray-700 cursor-pointer"
+                             onclick="usePrompt('Write a brief product advertisement highlighting key features and benefits')">
+                            <i class="fas fa-shopping-bag text-green-500 mr-2"></i>
+                            Product Advertisement
+                        </div>
+                        <div class="prompt-suggestion p-3 rounded-lg border border-gray-700 cursor-pointer"
+                             onclick="usePrompt('Create an educational explanation about an interesting scientific concept')">
+                            <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                            Educational Content
+                        </div>
+                        <div class="prompt-suggestion p-3 rounded-lg border border-gray-700 cursor-pointer"
+                             onclick="usePrompt('Write a travel destination showcase highlighting culture and attractions')">
+                            <i class="fas fa-plane text-purple-500 mr-2"></i>
+                            Travel Showcase
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Background Music -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">4. Background Music Options</h2>
-            <div class="flex items-center space-x-4">
-                <label class="inline-flex items-center">
-                    <input type="checkbox" id="useBackgroundMusic" class="form-checkbox h-5 w-5 text-blue-600">
-                    <span class="ml-2">Add background music</span>
-                </label>
-                <div class="flex items-center">
-                    <label class="mr-2">Volume:</label>
-                    <input type="range" id="bgMusicVolume" min="0" max="100" value="30" class="w-32">
-                    <span id="volumeValue" class="ml-2">30%</span>
+                <!-- Custom Prompt Input -->
+                <div class="space-y-4">
+                    <div class="relative">
+                        <textarea id="prompt" 
+                                class="w-full p-4 bg-gray-800 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-white"
+                                rows="4"
+                                placeholder="Enter your prompt or select a quick prompt above..."></textarea>
+                        <div class="absolute bottom-3 right-3 text-gray-400 text-sm">
+                            <span id="charCount">0</span> / 500
+                        </div>
+                    </div>
+                    
+                    <!-- Generation Options -->
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="generateText(this)" class="btn-gradient px-6 py-3 rounded-lg font-semibold flex items-center">
+                            <i class="fas fa-magic mr-2"></i>
+                            <span>Generate Text</span>
+                        </button>
+                        <button onclick="regenerateText(this)" class="hidden btn-gradient px-6 py-3 rounded-lg font-semibold flex items-center" id="regenerateBtn">
+                            <i class="fas fa-redo mr-2"></i>
+                            <span>Regenerate</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generated Text Display -->
+                <div id="generatedTextContainer" class="mt-6 hidden">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold">Generated Content</h3>
+                        <div class="space-x-2">
+                            <button onclick="editText()" class="text-indigo-400 hover:text-indigo-300 transition-colors" id="editBtn">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button onclick="saveText()" class="hidden text-green-400 hover:text-green-300 transition-colors" id="saveBtn">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button onclick="cancelEdit()" class="hidden text-red-400 hover:text-red-300 transition-colors" id="cancelBtn">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="generated-text-container">
+                        <div id="generatedText" class="p-4 bg-gray-800 rounded-lg"></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Video Creation -->
-        <div class="mb-8">
-            <h2 class="text-xl font-semibold mb-4">5. Create Final Video</h2>
-            <button onclick="createVideo()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create Video</button>
-            <div id="finalVideo" class="mt-4 hidden">
-                <video id="finalPlayer" class="w-full rounded" controls></video>
-                <a id="downloadLink" class="mt-2 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" download>Download Video</a>
+            <!-- Step 2: Video Search -->
+            <div id="step2" class="glass-effect rounded-xl p-6 shadow-xl step-disabled">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-4">
+                        <span class="text-xl">2</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold">Search Stock Footage</h2>
+                </div>
+
+                <!-- Orientation Selection -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Choose Video Orientation</h3>
+                    <div class="flex justify-center space-x-6">
+                        <div id="landscape-option" 
+                             class="orientation-option border-2 border-gray-600 rounded-lg p-4 text-center w-40 orientation-selected"
+                             onclick="selectOrientation('landscape')">
+                            <i class="fas fa-tv orientation-icon"></i>
+                            <div>Landscape</div>
+                            <div class="text-sm text-gray-400">16:9</div>
+                        </div>
+                        <div id="portrait-option"
+                             class="orientation-option border-2 border-gray-600 rounded-lg p-4 text-center w-40"
+                             onclick="selectOrientation('portrait')">
+                            <i class="fas fa-mobile-alt orientation-icon"></i>
+                            <div>Portrait</div>
+                            <div class="text-sm text-gray-400">9:16</div>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="text" id="videoQuery" class="w-full p-4 bg-gray-800 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-white" placeholder="Enter keywords for video search...">
+                <button onclick="searchVideo(this)" class="mt-4 btn-gradient px-6 py-3 rounded-lg font-semibold flex items-center">
+                    <i class="fas fa-search mr-2"></i>
+                    <span>Search Video</span>
+                </button>
+                <div id="videoPreview" class="mt-4 hidden">
+                    <video id="previewPlayer" class="w-full rounded-lg" controls></video>
+                </div>
+            </div>
+
+            <!-- Step 3: Speech Generation -->
+            <div id="step3" class="glass-effect rounded-xl p-6 shadow-xl step-disabled">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-4">
+                        <span class="text-xl">3</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold">Generate Speech</h2>
+                </div>
+                <button onclick="generateSpeech(this)" class="btn-gradient px-6 py-3 rounded-lg font-semibold flex items-center">
+                    <i class="fas fa-microphone mr-2"></i>
+                    <span>Generate Speech</span>
+                </button>
+                <div id="audioPreview" class="mt-4 hidden">
+                    <audio id="previewAudio" class="w-full" controls></audio>
+                </div>
+            </div>
+
+            <!-- Step 4: Background Music -->
+            <div id="step4" class="glass-effect rounded-xl p-6 shadow-xl step-disabled">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-4">
+                        <span class="text-xl">4</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold">Background Music</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="useBackgroundMusic" class="form-checkbox h-5 w-5 text-indigo-600">
+                        <span class="ml-2">Add background music</span>
+                    </label>
+                    <div class="flex items-center flex-1">
+                        <label class="mr-2">Volume:</label>
+                        <input type="range" id="bgMusicVolume" min="0" max="100" value="30" 
+                               class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                        <span id="volumeValue" class="ml-2 w-12">30%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Video Creation -->
+            <div id="step5" class="glass-effect rounded-xl p-6 shadow-xl step-disabled">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center mr-4">
+                        <span class="text-xl">5</span>
+                    </div>
+                    <h2 class="text-2xl font-semibold">Create Final Video</h2>
+                </div>
+                <button onclick="createVideo(this)" class="btn-gradient px-6 py-3 rounded-lg font-semibold flex items-center">
+                    <i class="fas fa-film mr-2"></i>
+                    <span>Create Video</span>
+                </button>
+                <div id="finalVideo" class="mt-4 hidden">
+                    <video id="finalPlayer" class="w-full rounded-lg" controls></video>
+                    <a id="downloadLink" class="mt-4 btn-gradient px-6 py-3 rounded-lg font-semibold inline-flex items-center">
+                        <i class="fas fa-download mr-2"></i>
+                        <span>Download Video</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -69,17 +295,116 @@
         let generatedText = '';
         let videoPath = '';
         let audioPath = '';
-        
-        // Update volume display
-        document.getElementById('bgMusicVolume').addEventListener('input', function(e) {
-            document.getElementById('volumeValue').textContent = e.target.value + '%';
-        });
+        let originalText = '';
+        let selectedOrientation = 'landscape';
 
-        async function generateText() {
+        function showError(message, container) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            container.insertBefore(errorDiv, container.firstChild);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message, container) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+            container.insertBefore(successDiv, container.firstChild);
+            setTimeout(() => successDiv.remove(), 5000);
+        }
+
+        function setLoading(button, isLoading) {
+            if (isLoading) {
+                const originalContent = button.innerHTML;
+                button.setAttribute('data-original-content', originalContent);
+                button.innerHTML = `
+                    <svg class="loading-spinner w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                `;
+                button.disabled = true;
+                button.classList.add('opacity-75', 'cursor-not-allowed');
+            } else {
+                const originalContent = button.getAttribute('data-original-content');
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                button.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        function enableStep(stepNumber) {
+            document.getElementById(`step${stepNumber}`).classList.remove('step-disabled');
+            document.getElementById(`step${stepNumber}`).classList.add('step-enabled');
+        }
+
+        function usePrompt(prompt) {
+            document.getElementById('prompt').value = prompt;
+            updateCharCount();
+        }
+
+        function updateCharCount() {
             const prompt = document.getElementById('prompt').value;
-            if (!prompt) return;
+            document.getElementById('charCount').textContent = prompt.length;
+        }
+
+        document.getElementById('prompt').addEventListener('input', updateCharCount);
+
+        function selectOrientation(orientation) {
+            selectedOrientation = orientation;
+            document.getElementById('landscape-option').classList.toggle('orientation-selected', orientation === 'landscape');
+            document.getElementById('portrait-option').classList.toggle('orientation-selected', orientation === 'portrait');
+            const videoPreview = document.getElementById('videoPreview');
+            videoPreview.classList.add('hidden');
+            videoPath = '';
+        }
+
+        function editText() {
+            const textDiv = document.getElementById('generatedText');
+            originalText = textDiv.textContent;
+            textDiv.contentEditable = true;
+            textDiv.classList.add('edit-mode');
+            document.getElementById('editBtn').classList.add('hidden');
+            document.getElementById('saveBtn').classList.remove('hidden');
+            document.getElementById('cancelBtn').classList.remove('hidden');
+        }
+
+        function saveText() {
+            const textDiv = document.getElementById('generatedText');
+            generatedText = textDiv.textContent;
+            textDiv.contentEditable = false;
+            textDiv.classList.remove('edit-mode');
+            document.getElementById('editBtn').classList.remove('hidden');
+            document.getElementById('saveBtn').classList.add('hidden');
+            document.getElementById('cancelBtn').classList.add('hidden');
+        }
+
+        function cancelEdit() {
+            const textDiv = document.getElementById('generatedText');
+            textDiv.textContent = originalText;
+            textDiv.contentEditable = false;
+            textDiv.classList.remove('edit-mode');
+            document.getElementById('editBtn').classList.remove('hidden');
+            document.getElementById('saveBtn').classList.add('hidden');
+            document.getElementById('cancelBtn').classList.add('hidden');
+        }
+
+        async function generateText(button) {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                showError('Please enter a prompt or select a quick prompt', button.parentElement);
+                return;
+            }
+
+            if (prompt.length > 500) {
+                showError('Prompt is too long (max 500 characters)', button.parentElement);
+                return;
+            }
 
             try {
+                setLoading(button, true);
                 const response = await fetch('/generate-text', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -87,50 +412,87 @@
                 });
 
                 const data = await response.json();
-                if (data.text) {
-                    generatedText = data.text;
-                    const textDiv = document.getElementById('generatedText');
-                    textDiv.textContent = data.text;
-                    textDiv.classList.remove('hidden');
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to generate text');
                 }
+
+                generatedText = data.text;
+                const container = document.getElementById('generatedTextContainer');
+                const textDiv = document.getElementById('generatedText');
+                textDiv.textContent = data.text;
+                container.classList.remove('hidden');
+                container.classList.add('fade-in');
+                document.getElementById('regenerateBtn').classList.remove('hidden');
+                enableStep(2);
+                
+                showSuccess('Text generated successfully', button.parentElement);
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to generate text');
+                showError(error.message || 'Failed to generate text', button.parentElement);
+            } finally {
+                setLoading(button, false);
             }
         }
 
-        async function searchVideo() {
+        async function regenerateText(button) {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                showError('Please enter a prompt or select a quick prompt', button.parentElement);
+                return;
+            }
+            await generateText(button);
+        }
+
+        async function searchVideo(button) {
             const query = document.getElementById('videoQuery').value;
-            if (!query) return;
-
-            try {
-                const response = await fetch('/download-video', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
-                });
-
-                const data = await response.json();
-                if (data.path) {
-                    videoPath = data.path;
-                    const preview = document.getElementById('videoPreview');
-                    const player = document.getElementById('previewPlayer');
-                    player.src = `/download/${data.path.split('/').pop()}`;
-                    preview.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Failed to download video');
-            }
-        }
-
-        async function generateSpeech() {
-            if (!generatedText) {
-                alert('Please generate text first');
+            if (!query) {
+                showError('Please enter search keywords', button.parentElement);
                 return;
             }
 
             try {
+                setLoading(button, true);
+                const response = await fetch('/download-video', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query,
+                        orientation: selectedOrientation
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to download video');
+                }
+
+                videoPath = data.path;
+                const preview = document.getElementById('videoPreview');
+                const player = document.getElementById('previewPlayer');
+                player.src = `/download/${data.path.split('/').pop()}`;
+                preview.classList.remove('hidden');
+                preview.classList.add('fade-in');
+                enableStep(3);
+                
+                showSuccess('Video downloaded successfully', button.parentElement);
+            } catch (error) {
+                console.error('Error:', error);
+                showError(error.message || 'Failed to download video', button.parentElement);
+            } finally {
+                setLoading(button, false);
+            }
+        }
+
+        async function generateSpeech(button) {
+            if (!generatedText) {
+                showError('Please generate text first', button.parentElement);
+                return;
+            }
+
+            try {
+                setLoading(button, true);
                 const response = await fetch('/generate-speech', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -138,22 +500,32 @@
                 });
 
                 const data = await response.json();
-                if (data.path) {
-                    audioPath = data.path;
-                    const preview = document.getElementById('audioPreview');
-                    const audio = document.getElementById('previewAudio');
-                    audio.src = `/download/${data.path.split('/').pop()}`;
-                    preview.classList.remove('hidden');
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to generate speech');
                 }
+
+                audioPath = data.path;
+                const preview = document.getElementById('audioPreview');
+                const audio = document.getElementById('previewAudio');
+                audio.src = `/download/${data.path.split('/').pop()}`;
+                preview.classList.remove('hidden');
+                preview.classList.add('fade-in');
+                enableStep(4);
+                enableStep(5);
+                
+                showSuccess('Speech generated successfully', button.parentElement);
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to generate speech');
+                showError(error.message || 'Failed to generate speech', button.parentElement);
+            } finally {
+                setLoading(button, false);
             }
         }
 
-        async function createVideo() {
+        async function createVideo(button) {
             if (!videoPath || !audioPath) {
-                alert('Please ensure you have both video and audio ready');
+                showError('Please ensure you have both video and audio ready', button.parentElement);
                 return;
             }
 
@@ -161,6 +533,7 @@
             const bgVolume = document.getElementById('bgMusicVolume').value / 100;
 
             try {
+                setLoading(button, true);
                 const response = await fetch('/create-video', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -169,26 +542,40 @@
                         audio_path: audioPath,
                         text_content: generatedText,
                         background_music: useBackgroundMusic ? 'yes' : 'no',
-                        background_volume: bgVolume
+                        background_volume: bgVolume,
+                        orientation: selectedOrientation
                     })
                 });
 
                 const data = await response.json();
-                if (data.path) {
-                    const finalDiv = document.getElementById('finalVideo');
-                    const player = document.getElementById('finalPlayer');
-                    const downloadLink = document.getElementById('downloadLink');
-                    const filename = data.path.split('/').pop();
-                    
-                    player.src = `/download/${filename}`;
-                    downloadLink.href = `/download/${filename}`;
-                    finalDiv.classList.remove('hidden');
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to create video');
                 }
+
+                const finalDiv = document.getElementById('finalVideo');
+                const player = document.getElementById('finalPlayer');
+                const downloadLink = document.getElementById('downloadLink');
+                const filename = data.path.split('/').pop();
+                
+                player.src = `/download/${filename}`;
+                downloadLink.href = `/download/${filename}`;
+                finalDiv.classList.remove('hidden');
+                finalDiv.classList.add('fade-in');
+                
+                showSuccess('Video created successfully', button.parentElement);
             } catch (error) {
                 console.error('Error:', error);
-                alert('Failed to create video');
+                showError(error.message || 'Failed to create video', button.parentElement);
+            } finally {
+                setLoading(button, false);
             }
         }
+
+        // Volume slider event listener
+        document.getElementById('bgMusicVolume').addEventListener('input', function(e) {
+            document.getElementById('volumeValue').textContent = e.target.value + '%';
+        });
     </script>
 </body>
 </html>
