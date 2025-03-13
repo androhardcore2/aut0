@@ -8,6 +8,7 @@ import requests
 from moviepy.editor import VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip, ColorClip, concatenate_audioclips, CompositeAudioClip
 import tempfile
 import logging
+import traceback
 from datetime import datetime
 
 # Configure logging
@@ -33,271 +34,448 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs('static/music', exist_ok=True)
 
-# Initialize APIs
-def init_apis():
-    try:
-        # Gemini API
-        gemini_api_key = os.getenv('GEMINI_API_KEY')
-        if gemini_api_key:
-            genai.configure(api_key=gemini_api_key)
-            logger.info("Gemini API initialized successfully")
-        else:
-            logger.warning("Gemini API key not found")
-        
-        # ElevenLabs API
-        elevenlabs_api_key = os.getenv('ELEVENLABS_API_KEY')
-        if elevenlabs_api_key:
-            set_api_key(elevenlabs_api_key)
-            logger.info("ElevenLabs API initialized successfully")
-        else:
-            logger.warning("ElevenLabs API key not found")
-    except Exception as e:
-        logger.error(f"Error initializing APIs: {str(e)}")
+# Global variables
+model = None
 
-# Initialize APIs on startup
-init_apis()
+def initialize_gemini():
+    """Initialize Gemini model with proper error handling"""
+    try:
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
+            raise ValueError("Gemini API key not found in environment variables")
+        
+        genai.configure(api_key=api_key)
+        
+        global model
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        # Test the model with a simple prompt
+        test_response = model.generate_content("Hello")
+        if not test_response.text:
+            raise Exception("Model test failed - empty response")
+            
+        logger.info("Gemini model initialized and tested successfully")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to initialize Gemini model: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False
+
+def initialize_elevenlabs():
+    """Initialize ElevenLabs with proper error handling"""
+    try:
+        api_key = os.getenv('ELEVENLABS_API_KEY')
+        if not api_key:
+            raise ValueError("ElevenLabs API key not found in environment variables")
+        
+        set_api_key(api_key)
+        logger.info("ElevenLabs initialized successfully")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to initialize ElevenLabs: {str(e)}")
+        logger.error(traceback.format_exc())
+        return False
+
+# Initialize APIs
+if not initialize_gemini():
+    logger.error("Failed to initialize Gemini - text generation will be unavailable")
+
+if not initialize_elevenlabs():
+    logger.error("Failed to initialize ElevenLabs - speech generation will be unavailable")
 
 @app.route('/')
 def index():
-    logger.info("Homepage accessed")
     return render_template('index.html')
 
 @app.route('/generate-text', methods=['POST'])
 def generate_text():
     try:
-        prompt = request.json.get('prompt')
+        if not model:
+            raise Exception("Gemini model not initialized")
+
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON data received")
+
+        prompt = data.get('prompt')
         if not prompt:
-            logger.warning("No prompt provided for text generation")
-            return jsonify({'error': 'No prompt provided'}), 400
+            raise ValueError("No prompt provided")
+
+        if len(prompt) > 500:
+            raise ValueError("Prompt too long (max 500 characters)")
 
         logger.info(f"Generating text for prompt: {prompt[:50]}...")
-        
-        # Using gemini-2.0-flash model for faster responses
-        model = genai.GenerativeModel('gemini-2.0-flash')
+
+        # Configure generation parameters
+        safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_NONE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_NONE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_NONE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_NONE"
+            }
+        ]
+
         generation_config = {
-            'temperature': 0.9,
-            'top_p': 1,
-            'top_k': 1,
-            'max_output_tokens': 2048,
+            "temperature": 0.9,
+            "top_p": 1,
+            "top_k": 1,
+            "max_output_tokens": 2048,
         }
-        
+
+        # Generate content
         response = model.generate_content(
             prompt,
-            generation_config=generation_config
+            generation_config=generation_config,
+            safety_settings=safety_settings
         )
-        
-        if response.text:
-            logger.info("Text generated successfully")
-            return jsonify({'text': response.text.strip()})
-        else:
-            logger.error("No text generated from Gemini API")
-            return jsonify({'error': 'No text generated'}), 500
+
+        if not response:
+            raise Exception("No response from Gemini API")
+
+        if not response.text:
+            raise Exception("Empty response from Gemini API")
+
+        generated_text = response.text.strip()
+        if not generated_text:
+            raise Exception("Generated text is empty after processing")
+
+        logger.info("Text generated successfully")
+        return jsonify({
+            'success': True,
+            'text': generated_text
+        })
+
+    except ValueError as e:
+        logger.warning(f"Validation error in generate_text: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
     except Exception as e:
-        logger.error(f"Error in text generation: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error in generate_text: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to generate text. Please try again."
+        }), 500
 
 @app.route('/download-video', methods=['POST'])
 def download_video():
     try:
-        query = request.json.get('query')
-        if not query:
-            logger.warning("No search query provided for video download")
-            return jsonify({'error': 'No search query provided'}), 400
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON data received")
 
-        logger.info(f"Searching video for query: {query}")
-        headers = {'Authorization': os.getenv('PEXELS_API_KEY')}
+        query = data.get('query')
+        if not query:
+            raise ValueError("No search query provided")
+
+        orientation = data.get('orientation', 'landscape')
+        if orientation not in ['landscape', 'portrait']:
+            raise ValueError("Invalid orientation specified")
+
+        api_key = os.getenv('PEXELS_API_KEY')
+        if not api_key:
+            raise Exception("Pexels API key not configured")
+
+        headers = {'Authorization': api_key}
+        
+        logger.info(f"Searching for {orientation} video: {query}")
+        
         response = requests.get(
-            f'https://api.pexels.com/videos/search?query={query}&per_page=1',
+            f'https://api.pexels.com/videos/search?query={query}&per_page=10&orientation={orientation}',
             headers=headers
         )
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data['videos']:
-                video_file = data['videos'][0]['video_files'][0]
-                video_url = video_file['link']
-                
-                logger.info(f"Downloading video from: {video_url}")
-                video_response = requests.get(video_url)
-                if video_response.status_code == 200:
-                    video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_video.mp4')
-                    with open(video_path, 'wb') as f:
-                        f.write(video_response.content)
-                    logger.info("Video downloaded successfully")
-                    return jsonify({'path': video_path})
+
+        if response.status_code != 200:
+            raise Exception(f"Pexels API error: {response.status_code}")
+
+        data = response.json()
+        if not data.get('videos'):
+            raise Exception("No videos found")
+
+        # Find suitable video
+        selected_video = None
+        for video in data['videos']:
+            video_files = video.get('video_files', [])
+            if not video_files:
+                continue
+
+            # Get the highest quality MP4 file under 10MB
+            suitable_files = [
+                f for f in video_files
+                if f['file_type'] == 'video/mp4' and f.get('width', 0) >= 720
+            ]
             
-            logger.warning("No videos found in Pexels response")
-            return jsonify({'error': 'No videos found'}), 404
-        else:
-            logger.error(f"Failed to fetch video: {response.status_code}")
-            return jsonify({'error': 'Failed to fetch video'}), response.status_code
+            if suitable_files:
+                selected_video = suitable_files[0]
+                break
+
+        if not selected_video:
+            raise Exception("No suitable video found")
+
+        # Download video
+        video_url = selected_video['link']
+        logger.info(f"Downloading video from: {video_url}")
+        
+        video_response = requests.get(video_url, stream=True)
+        if video_response.status_code != 200:
+            raise Exception("Failed to download video file")
+
+        video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_video.mp4')
+        with open(video_path, 'wb') as f:
+            for chunk in video_response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        logger.info("Video downloaded successfully")
+        return jsonify({
+            'success': True,
+            'path': video_path
+        })
+
+    except ValueError as e:
+        logger.warning(f"Validation error in download_video: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
     except Exception as e:
-        logger.error(f"Error in video download: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error in download_video: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to download video. Please try again."
+        }), 500
 
 @app.route('/generate-speech', methods=['POST'])
 def generate_speech():
     try:
-        text = request.json.get('text')
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON data received")
+
+        text = data.get('text')
         if not text:
-            logger.warning("No text provided for speech generation")
-            return jsonify({'error': 'No text provided'}), 400
+            raise ValueError("No text provided")
+
+        if len(text) > 5000:
+            raise ValueError("Text too long (max 5000 characters)")
 
         logger.info("Generating speech from text")
+        
         audio = generate(
             text=text,
             voice="21m00Tcm4TlvDq8ikWAM",
             model="eleven_monolingual_v1"
         )
         
+        if not audio:
+            raise Exception("Failed to generate audio")
+
         audio_path = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_audio.mp3')
         save(audio, audio_path)
-        logger.info("Speech generated successfully")
         
-        return jsonify({'path': audio_path})
+        logger.info("Speech generated successfully")
+        return jsonify({
+            'success': True,
+            'path': audio_path
+        })
+
+    except ValueError as e:
+        logger.warning(f"Validation error in generate_speech: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
     except Exception as e:
-        logger.error(f"Error in speech generation: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error in generate_speech: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to generate speech. Please try again."
+        }), 500
 
 @app.route('/create-video', methods=['POST'])
 def create_video():
     try:
-        video_path = request.json.get('video_path')
-        audio_path = request.json.get('audio_path')
-        text_content = request.json.get('text_content')
-        use_background_music = request.json.get('background_music') == 'yes'
-        background_volume = float(request.json.get('background_volume', 0.3))
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON data received")
 
-        if not all([video_path, audio_path, text_content]):
-            logger.warning("Missing required parameters for video creation")
-            return jsonify({'error': 'Missing required parameters'}), 400
+        required_fields = ['video_path', 'audio_path', 'text_content']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        if missing_fields:
+            raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
+
+        video_path = data['video_path']
+        audio_path = data['audio_path']
+        text_content = data['text_content']
+        use_background_music = data.get('background_music') == 'yes'
+        background_volume = float(data.get('background_volume', 0.3))
+        orientation = data.get('orientation', 'landscape')
+
+        if not os.path.exists(video_path):
+            raise ValueError("Video file not found")
+        if not os.path.exists(audio_path):
+            raise ValueError("Audio file not found")
 
         logger.info("Starting video creation process")
-        
+
         # Load video and audio
-        logger.info("Loading video and audio files")
         video = VideoFileClip(video_path)
         voiceover = AudioFileClip(audio_path)
 
-        # Handle background music if selected
-        if use_background_music and os.path.exists('static/music/background.mp3'):
+        # Process background music if requested
+        if use_background_music:
             try:
-                logger.info("Adding background music")
                 bg_music = AudioFileClip('static/music/background.mp3')
-                
-                # Loop background music if needed
                 if bg_music.duration < voiceover.duration:
                     loops_needed = int(voiceover.duration / bg_music.duration) + 1
-                    logger.info(f"Looping background music {loops_needed} times")
                     bg_music = concatenate_audioclips([bg_music] * loops_needed)
-                
-                # Set duration and volume
                 bg_music = bg_music.subclip(0, voiceover.duration)
                 bg_music = bg_music.volumex(background_volume)
-                logger.info(f"Background music volume set to {background_volume}")
-                
-                # Mix background music with voiceover
                 final_audio = CompositeAudioClip([voiceover, bg_music])
-                logger.info("Audio mixing completed")
             except Exception as e:
-                logger.error(f"Error processing background music: {str(e)}")
+                logger.error(f"Background music processing failed: {str(e)}")
                 final_audio = voiceover
         else:
             final_audio = voiceover
 
-        # Resize video to 720p
-        logger.info("Resizing video to 720p")
-        video = video.resize(height=720)
-        
-        # Create text clips
-        logger.info("Creating text overlays")
+        # Resize video
+        if orientation == 'portrait':
+            video = video.resize(width=720)
+        else:
+            video = video.resize(height=720)
+
+        # Create text overlays
         clips = [video]
         sentences = [s.strip() for s in text_content.split('.') if s.strip()]
         
+        text_width = int(video.w * 0.8)
+        text_y_position = 0.8 if orientation == 'landscape' else 0.9
+
         for i, text in enumerate(sentences):
             try:
-                # Create background for text
+                bg_height = 80 if orientation == 'landscape' else 100
                 bg_clip = ColorClip(
-                    size=(video.w, 80),
+                    size=(video.w, bg_height),
                     color=(0, 0, 0)
                 ).set_opacity(0.5)
-                bg_clip = bg_clip.set_position(('center', 'bottom'))
+                bg_clip = bg_clip.set_position(('center', text_y_position), relative=True)
                 bg_clip = bg_clip.set_start(i * 3).set_duration(3)
                 
-                # Create text
                 txt_clip = TextClip(
                     text,
-                    fontsize=30,
+                    fontsize=30 if orientation == 'landscape' else 25,
                     color='white',
-                    size=(video.w - 40, None),
+                    size=(text_width, None),
                     method='caption'
                 )
-                txt_clip = txt_clip.set_position(('center', 'bottom'))
+                txt_clip = txt_clip.set_position(('center', text_y_position), relative=True)
                 txt_clip = txt_clip.set_start(i * 3).set_duration(3)
                 
                 clips.extend([bg_clip, txt_clip])
-                logger.info(f"Added text overlay {i+1}/{len(sentences)}")
             except Exception as e:
-                logger.error(f"Error creating text clip: {str(e)}")
+                logger.error(f"Error creating text overlay: {str(e)}")
                 continue
 
-        try:
-            # Combine all clips
-            logger.info("Combining video clips")
-            final_video = CompositeVideoClip(clips)
-            
-            # Add final audio
-            logger.info("Adding audio to video")
-            final_video = final_video.set_audio(final_audio)
-            
-            # Set duration
-            final_duration = min(video.duration, voiceover.duration)
-            final_video = final_video.set_duration(final_duration)
-            logger.info(f"Final video duration: {final_duration} seconds")
+        # Combine clips and audio
+        final_video = CompositeVideoClip(clips)
+        final_video = final_video.set_audio(final_audio)
+        final_duration = min(video.duration, voiceover.duration)
+        final_video = final_video.set_duration(final_duration)
 
-            # Export
-            output_path = os.path.join(app.config['UPLOAD_FOLDER'], 'final_video.mp4')
-            logger.info("Exporting final video")
-            final_video.write_videofile(
-                output_path,
-                fps=24,
-                codec='libx264',
-                audio_codec='aac',
-                temp_audiofile='temp-audio.m4a',
-                remove_temp=True,
-                threads=2,
-                preset='ultrafast'
-            )
+        # Export video
+        output_path = os.path.join(app.config['UPLOAD_FOLDER'], 'final_video.mp4')
+        final_video.write_videofile(
+            output_path,
+            fps=24,
+            codec='libx264',
+            audio_codec='aac',
+            temp_audiofile='temp-audio.m4a',
+            remove_temp=True,
+            threads=2,
+            preset='ultrafast'
+        )
 
-            # Clean up
-            logger.info("Cleaning up resources")
-            video.close()
-            voiceover.close()
-            if use_background_music and 'bg_music' in locals():
-                bg_music.close()
-            final_video.close()
+        # Cleanup
+        video.close()
+        voiceover.close()
+        if use_background_music and 'bg_music' in locals():
+            bg_music.close()
+        final_video.close()
 
-            logger.info("Video creation completed successfully")
-            return jsonify({'path': output_path})
-        except Exception as e:
-            logger.error(f"Error in video processing: {str(e)}")
-            return jsonify({'error': f'Video processing error: {str(e)}'}), 500
-            
+        logger.info("Video created successfully")
+        return jsonify({
+            'success': True,
+            'path': output_path
+        })
+
+    except ValueError as e:
+        logger.warning(f"Validation error in create_video: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
     except Exception as e:
         logger.error(f"Error in create_video: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to create video. Please try again."
+        }), 500
 
 @app.route('/download/<filename>')
 def download_file(filename):
     try:
-        logger.info(f"Downloading file: {filename}")
-        return send_file(
-            os.path.join(app.config['UPLOAD_FOLDER'], filename),
-            as_attachment=True
-        )
+        if not filename:
+            raise ValueError("No filename provided")
+
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if not os.path.exists(file_path):
+            raise ValueError("File not found")
+
+        return send_file(file_path, as_attachment=True)
+
+    except ValueError as e:
+        logger.warning(f"Validation error in download_file: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
     except Exception as e:
-        logger.error(f"Error downloading file: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Error in download_file: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to download file. Please try again."
+        }), 500
+
+@app.errorhandler(Exception)
+def handle_error(error):
+    logger.error(f"Unhandled error: {str(error)}")
+    logger.error(traceback.format_exc())
+    return jsonify({
+        'success': False,
+        'error': "An unexpected error occurred. Please try again."
+    }), 500
 
 if __name__ == '__main__':
     logger.info("Starting Flask application")
