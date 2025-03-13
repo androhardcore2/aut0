@@ -179,12 +179,11 @@ def download_video():
             raise ValueError("No JSON data received")
 
         query = data.get('query')
+        orientation = data.get('orientation', 'landscape')
+        page = data.get('page', 1)
+        
         if not query:
             raise ValueError("No search query provided")
-
-        orientation = data.get('orientation', 'landscape')
-        if orientation not in ['landscape', 'portrait']:
-            raise ValueError("Invalid orientation specified")
 
         api_key = os.getenv('PEXELS_API_KEY')
         if not api_key:
@@ -192,10 +191,10 @@ def download_video():
 
         headers = {'Authorization': api_key}
         
-        logger.info(f"Searching for {orientation} video: {query}")
+        logger.info(f"Searching for {orientation} video: {query} (page {page})")
         
         response = requests.get(
-            f'https://api.pexels.com/videos/search?query={query}&per_page=10&orientation={orientation}',
+            f'https://api.pexels.com/videos/search?query={query}&per_page=10&page={page}&orientation={orientation}',
             headers=headers
         )
 
@@ -206,29 +205,60 @@ def download_video():
         if not data.get('videos'):
             raise Exception("No videos found")
 
-        # Find suitable video
-        selected_video = None
+        # Return all videos for preview
+        videos_data = []
         for video in data['videos']:
-            video_files = video.get('video_files', [])
-            if not video_files:
-                continue
-
-            # Get the highest quality MP4 file under 10MB
-            suitable_files = [
-                f for f in video_files
-                if f['file_type'] == 'video/mp4' and f.get('width', 0) >= 720
-            ]
+            video_files = sorted(
+                [f for f in video['video_files'] if f['file_type'] == 'video/mp4'],
+                key=lambda x: x.get('width', 0)
+            )
             
-            if suitable_files:
-                selected_video = suitable_files[0]
-                break
+            if video_files:
+                selected_file = video_files[0]
+                videos_data.append({
+                    'id': video['id'],
+                    'url': selected_file['link'],
+                    'width': selected_file['width'],
+                    'height': selected_file['height'],
+                    'duration': video['duration'],
+                    'preview': video.get('image', '')
+                })
 
-        if not selected_video:
-            raise Exception("No suitable video found")
+        return jsonify({
+            'success': True,
+            'videos': videos_data,
+            'total_results': data.get('total_results', 0),
+            'page': page,
+            'per_page': 10
+        })
 
-        # Download video
-        video_url = selected_video['link']
-        logger.info(f"Downloading video from: {video_url}")
+    except ValueError as e:
+        logger.warning(f"Validation error in download_video: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+    except Exception as e:
+        logger.error(f"Error in download_video: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': "Failed to search videos. Please try again."
+        }), 500
+
+@app.route('/select-video', methods=['POST'])
+def select_video():
+    try:
+        data = request.get_json()
+        if not data:
+            raise ValueError("No JSON data received")
+
+        video_url = data.get('url')
+        if not video_url:
+            raise ValueError("No video URL provided")
+
+        logger.info(f"Downloading selected video from: {video_url}")
         
         video_response = requests.get(video_url, stream=True)
         if video_response.status_code != 200:
@@ -247,14 +277,14 @@ def download_video():
         })
 
     except ValueError as e:
-        logger.warning(f"Validation error in download_video: {str(e)}")
+        logger.warning(f"Validation error in select_video: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)
         }), 400
 
     except Exception as e:
-        logger.error(f"Error in download_video: {str(e)}")
+        logger.error(f"Error in select_video: {str(e)}")
         logger.error(traceback.format_exc())
         return jsonify({
             'success': False,
