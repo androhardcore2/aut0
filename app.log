@@ -816,3 +816,126 @@ convert-im6.q16: no images defined `PNG32:/tmp/tmp9qq0o0fx.png' @ error/convert.
 2025-03-13 05:53:40,260 - INFO - 127.0.0.1 - - [13/Mar/2025 05:53:40] "[35m[1mGET /download/final_video.mp4 HTTP/1.1[0m" 206 -
 2025-03-13 05:53:40,509 - INFO - 127.0.0.1 - - [13/Mar/2025 05:53:40] "[35m[1mGET /download/final_video.mp4 HTTP/1.1[0m" 206 -
 2025-03-13 05:53:44,060 - INFO - 127.0.0.1 - - [13/Mar/2025 05:53:44] "[35m[1mGET /download/final_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 05:55:39,940 - INFO -  * Detected change in '/project/sandbox/user-workspace/app.py', reloading
+2025-03-13 05:55:42,106 - INFO -  * Restarting with stat
+2025-03-13 06:16:24,022 - ERROR - Failed to initialize Gemini model: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-03-13 06:16:24,029 - ERROR - Traceback (most recent call last):
+  File "/project/sandbox/user-workspace/app.py", line 53, in initialize_gemini
+    test_response = model.generate_content("Hello")
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/generativeai/generative_models.py", line 243, in generate_content
+    response = self._client.generate_content(request)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/client.py", line 566, in generate_content
+    response = rpc(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/gapic_v1/method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 153, in retry_target
+    _retry_error_helper(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_base.py", line 212, in _retry_error_helper
+    raise final_exc from source_exc
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 144, in retry_target
+    result = target()
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+
+2025-03-13 06:16:24,029 - ERROR - Failed to initialize Gemini - text generation will be unavailable
+2025-03-13 06:16:24,029 - INFO - ElevenLabs initialized successfully
+2025-03-13 06:16:24,034 - INFO - Starting Flask application
+2025-03-13 06:16:24,087 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.17.0.2:8080
+2025-03-13 06:16:24,087 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-13 06:16:24,089 - INFO -  * Restarting with stat
+2025-03-13 06:16:25,014 - ERROR - Failed to initialize Gemini model: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-03-13 06:16:25,017 - ERROR - Traceback (most recent call last):
+  File "/project/sandbox/user-workspace/app.py", line 53, in initialize_gemini
+    test_response = model.generate_content("Hello")
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/generativeai/generative_models.py", line 243, in generate_content
+    response = self._client.generate_content(request)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/ai/generativelanguage_v1beta/services/generative_service/client.py", line 566, in generate_content
+    response = rpc(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/gapic_v1/method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 293, in retry_wrapped_func
+    return retry_target(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 153, in retry_target
+    _retry_error_helper(
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_base.py", line 212, in _retry_error_helper
+    raise final_exc from source_exc
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/retry/retry_unary.py", line 144, in retry_target
+    result = target()
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "/usr/local/python/3.10.13/lib/python3.10/site-packages/google/api_core/grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.NotFound: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+
+2025-03-13 06:16:25,018 - ERROR - Failed to initialize Gemini - text generation will be unavailable
+2025-03-13 06:16:25,018 - INFO - ElevenLabs initialized successfully
+2025-03-13 06:16:25,023 - INFO - Starting Flask application
+2025-03-13 06:16:25,040 - WARNING -  * Debugger is active!
+2025-03-13 06:16:25,042 - INFO -  * Debugger PIN: 724-864-215
+2025-03-13 06:16:48,145 - INFO -  * Detected change in '/project/sandbox/user-workspace/app.py', reloading
+2025-03-13 06:16:50,299 - INFO -  * Restarting with stat
+2025-03-13 06:16:51,271 - INFO - Gemini model initialized and tested successfully
+2025-03-13 06:16:51,272 - INFO - ElevenLabs initialized successfully
+2025-03-13 06:16:51,276 - INFO - Starting Flask application
+2025-03-13 06:16:51,288 - WARNING -  * Debugger is active!
+2025-03-13 06:16:51,288 - INFO -  * Debugger PIN: 724-864-215
+2025-03-13 06:16:57,717 - INFO - 127.0.0.1 - - [13/Mar/2025 06:16:57] "GET / HTTP/1.1" 200 -
+2025-03-13 06:16:58,002 - INFO - 127.0.0.1 - - [13/Mar/2025 06:16:58] "GET /static/js/main.js HTTP/1.1" 200 -
+2025-03-13 06:16:58,003 - INFO - 127.0.0.1 - - [13/Mar/2025 06:16:58] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-03-13 06:17:03,386 - INFO - Generating text for prompt: solat jumat...
+2025-03-13 06:17:09,245 - INFO - Text generated successfully
+2025-03-13 06:17:09,246 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:09] "POST /generate-text HTTP/1.1" 200 -
+2025-03-13 06:17:39,438 - INFO - Searching for portrait video: masjid (page 1)
+2025-03-13 06:17:39,761 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:39] "POST /download-video HTTP/1.1" 200 -
+2025-03-13 06:17:50,734 - INFO - Downloading selected video from: https://videos.pexels.com/video-files/28459486/12389401_360_640_60fps.mp4
+2025-03-13 06:17:50,817 - INFO - Video downloaded successfully
+2025-03-13 06:17:50,820 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:50] "POST /select-video HTTP/1.1" 200 -
+2025-03-13 06:17:51,098 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:51] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:51,363 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:51] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:51,626 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:51] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:51,886 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:51] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:52,136 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:52] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:52,389 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:52] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:53,000 - INFO - Downloading selected video from: https://videos.pexels.com/video-files/28459486/12389401_360_640_60fps.mp4
+2025-03-13 06:17:53,046 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:53] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:53,091 - INFO - Video downloaded successfully
+2025-03-13 06:17:53,097 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:53] "POST /select-video HTTP/1.1" 200 -
+2025-03-13 06:17:53,362 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:53] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:53,612 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:53] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:54,301 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:54] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:17:57,584 - INFO - Downloading selected video from: https://videos.pexels.com/video-files/28459486/12389401_360_640_60fps.mp4
+2025-03-13 06:17:57,657 - INFO - Video downloaded successfully
+2025-03-13 06:17:57,661 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:57] "POST /select-video HTTP/1.1" 200 -
+2025-03-13 06:17:57,942 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:57] "GET /download/temp_video.mp4 HTTP/1.1" 200 -
+2025-03-13 06:17:58,162 - INFO - 127.0.0.1 - - [13/Mar/2025 06:17:58] "[35m[1mGET /download/temp_video.mp4 HTTP/1.1[0m" 206 -
+2025-03-13 06:18:03,496 - INFO - Generating speech from text
+2025-03-13 06:18:05,691 - INFO - Speech generated successfully
+2025-03-13 06:18:05,692 - INFO - 127.0.0.1 - - [13/Mar/2025 06:18:05] "POST /generate-speech HTTP/1.1" 200 -
+2025-03-13 06:18:05,948 - INFO - 127.0.0.1 - - [13/Mar/2025 06:18:05] "[35m[1mGET /download/temp_audio.mp3 HTTP/1.1[0m" 206 -
+2025-03-13 06:18:09,633 - INFO - Starting video creation process
+2025-03-13 06:18:10,075 - ERROR - Background music processing failed: MoviePy error: the file static/music/background.mp3 could not be found!
+Please check that you entered the correct path.
+2025-03-13 06:18:10,158 - ERROR - Error creating text overlay: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmpasgt3x4z.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmpjiin26v7.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-13 06:18:10,171 - ERROR - Error creating text overlay: MoviePy Error: creation of None failed because of the following error:
+
+convert-im6.q16: attempt to perform an operation not allowed by the security policy `@/tmp/tmpdvye0ohn.txt' @ error/property.c/InterpretImageProperties/3668.
+convert-im6.q16: no images defined `PNG32:/tmp/tmp88w2jc1d.png' @ error/convert.c/ConvertImageCommand/3258.
+.
+
+.This error can be due to the fact that ImageMagick is not installed on your computer, or (for Windows users) that you didn't specify the path to the ImageMagick binary in file conf.py, or that the path you specified is incorrect
+2025-03-13 06:18:19,658 - INFO - Video created successfully
+2025-03-13 06:18:19,658 - INFO - 127.0.0.1 - - [13/Mar/2025 06:18:19] "POST /create-video HTTP/1.1" 200 -
